@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.form-controller label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.35px;
+}
+.form-controller input,
+.form-controller select,
+.form-controller textarea {
+  width: 100%;
+  padding: 0.25em 0.5em;
+  border-radius: 0.5rem;
+  color: rgb(55 65 81);
+}
+.form-controller input:focus,
+.form-controller select:focus,
+.form-controller textarea:focus {
+  outline: none;
+}

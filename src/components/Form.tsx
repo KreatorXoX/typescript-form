@@ -1,6 +1,7 @@
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useForm } from "../shared/Form/form-hook";
 import FormInput from "../shared/Form/Input";
+import { Select, SelectOption } from "../shared/Form/MultiSelect";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
@@ -10,6 +11,15 @@ type Props = {};
 
 const arr = ["red", "blue", "purple", "orange"];
 const typeers = arr.map((item, idx) => <option key={idx}>{item}</option>);
+
+const options = [
+  { label: "First", value: 1 },
+  { label: "Second", value: 2 },
+  { label: "Third", value: 3 },
+  { label: "Fourth", value: 4 },
+  { label: "Fifth", value: 5 },
+];
+
 const Form = (props: Props) => {
   const { formState, inputHandler } = useForm(
     {
@@ -18,9 +28,13 @@ const Form = (props: Props) => {
       email: { value: "", isValid: false },
       password: { value: "", isValid: false },
       description: { value: "", isValid: false },
+      multiselect: { value: "", isValid: false },
     },
     false
   );
+
+  const [value1, setValue1] = useState<SelectOption[]>([]);
+  console.log(value1);
 
   const formSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
@@ -30,9 +44,17 @@ const Form = (props: Props) => {
   return (
     <form
       onSubmit={formSubmitHandler}
-      className="px-5 py-7 flex flex-col items-center rounded-lg border space-y-12 w-[40rem] text-slate-200"
+      className="px-5 py-7 flex flex-col items-center rounded-lg border space-y-2 w-[40rem] text-slate-200"
     >
       <h2 className="font-bold text-2xl mb-10">Form Title</h2>
+      <div className="w-full flex md:flex-row flex-col gap-4">
+        <Select
+          multiple
+          options={options}
+          value={value1}
+          onChange={(o) => setValue1(o)}
+        />
+      </div>
       <div className="w-full flex md:flex-row flex-col gap-4">
         {/* classic text input */}
         <FormInput

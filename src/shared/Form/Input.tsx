@@ -119,12 +119,10 @@ function FormInput(props: GeneralInputProps) {
 
   return (
     <div className="flex justify-center items-start w-full">
-      <div className="relative w-full form-controller">
+      <div className="w-full form-controller">
+        <label htmlFor={props.id}>{props.label}</label>
         {component}
-        <label className="absolute -top-7 left-0" htmlFor={props.id}>
-          {props.label}
-        </label>
-        <div className="errorLabel absolute -bottom-5 left-0">
+        <div className="errorLabel">
           {!inputState.isValid && inputState.isTouched && (
             <span className="text-red-600 text-xs font-semibold italic">
               {props.errorText}

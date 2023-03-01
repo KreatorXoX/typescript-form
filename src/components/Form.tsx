@@ -1,12 +1,15 @@
 import { FormEvent, useState } from "react";
 import { useForm } from "../shared/Form/form-hook";
 import FormInput from "../shared/Form/Input";
-import { Select, SelectOption } from "../shared/Form/MultiSelect";
+import { Select } from "../shared/Form/MultiSelect";
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE_SELECT,
 } from "../utils/validators";
+
+import { KvpProps } from "../shared/Form/MultiSelect";
+
 type Props = {};
 
 const arr = ["red", "blue", "purple", "orange"];
@@ -33,8 +36,7 @@ const Form = (props: Props) => {
     false
   );
 
-  const [value1, setValue1] = useState<SelectOption[]>([]);
-  console.log(value1);
+  const [value, setValue] = useState<KvpProps>(undefined);
 
   const formSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
@@ -49,10 +51,10 @@ const Form = (props: Props) => {
       <h2 className="font-bold text-2xl mb-10">Form Title</h2>
       <div className="w-full flex md:flex-row flex-col gap-4">
         <Select
-          multiple
+          id="numbers"
           options={options}
-          value={value1}
-          onChange={(o) => setValue1(o)}
+          kvpValues={value}
+          onChange={(o) => setValue(o)}
         />
       </div>
       <div className="w-full flex md:flex-row flex-col gap-4">

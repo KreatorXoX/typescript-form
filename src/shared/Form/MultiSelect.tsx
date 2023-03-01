@@ -5,42 +5,77 @@ export type SelectOption = {
   label: string;
   value: string | number;
 };
+export type KvpProps =
+  | {
+      [key: string]: {
+        value: SelectOption[];
+        isValid: boolean;
+      };
+    }
+  | undefined;
 
 type MultipleSelectProps = {
-  multiple: true;
-  value: SelectOption[];
-  onChange: (value: SelectOption[]) => void;
+  id: string;
+  kvpValues: KvpProps;
+  onChange: (value: KvpProps) => void;
 };
 
 type SelectProps = {
   options: SelectOption[];
 } & MultipleSelectProps;
 
-export function Select({ value, onChange, options }: SelectProps) {
+export function Select({ id, kvpValues, onChange, options }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   function clearOptions() {
-    onChange([]);
+    onChange(undefined);
   }
 
   function selectOption(option: SelectOption) {
-    if (value.includes(option)) {
-      onChange(value.filter((o) => o !== option));
+    let newValue: KvpProps;
+
+    if (kvpValues) {
+      if (kvpValues[id]?.value.includes(option)) {
+        const newValue: KvpProps = {
+          [id]: {
+            value: kvpValues[id].value.filter((o) => o !== option),
+            isValid: true,
+          },
+        };
+        onChange(newValue);
+      } else {
+        const newValue: KvpProps = {
+          [id]: {
+            value: [...kvpValues[id]?.value, option],
+            isValid: true,
+          },
+        };
+        onChange(newValue);
+      }
     } else {
-      onChange([...value, option]);
+      newValue = {
+        [id]: {
+          value: [option],
+          isValid: true,
+        },
+      };
+      onChange(newValue);
     }
   }
 
   function isOptionSelected(option: SelectOption) {
-    return value.includes(option);
+    if (kvpValues) return kvpValues[id].value.includes(option);
   }
 
   useEffect(() => {
-    if (isOpen) setHighlightedIndex(0);
+    if (isOpen) {
+      setHighlightedIndex(0);
+    }
   }, [isOpen]);
 
+  // for selecting input using keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target != containerRef.current) return;
@@ -82,7 +117,9 @@ export function Select({ value, onChange, options }: SelectProps) {
       </label>
       <div
         ref={containerRef}
-        onBlur={() => setIsOpen(false)}
+        onBlur={() => {
+          setIsOpen(false);
+        }}
         onClick={() => setIsOpen((prev) => !prev)}
         tabIndex={0}
         className="relative w-full rounded flex items-center gap-2 px-2 py-[0.2rem] outline-none border border-slate-100 bg-slate-100 text-gray-600
@@ -90,8 +127,8 @@ export function Select({ value, onChange, options }: SelectProps) {
       "
       >
         <span className="flex gap-1 flex-wrap w-full">
-          {value?.length > 0 ? (
-            value.map((v) => (
+          {kvpValues && kvpValues[id].value.length > 0 ? (
+            kvpValues[id]?.value.map((v) => (
               <button
                 key={v.value}
                 onClick={(e) => {

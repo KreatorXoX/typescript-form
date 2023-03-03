@@ -1,14 +1,19 @@
 import { useCallback, useReducer } from "react";
-type GeneralTaskType = {
-  [key: string]: { value: string; isValid: boolean };
+type GeneralInput = {
+  [key: string]: { value: string | string[]; isValid: boolean };
 };
-type State = {
-  inputs: GeneralTaskType;
+export type State = {
+  inputs: GeneralInput;
   isValid: boolean;
 };
 type Action =
-  | { type: "INPUT_CHANGE"; inputId: string; value: string; isValid: boolean }
-  | { type: "SET_DATA"; inputs: GeneralTaskType; validity: boolean };
+  | {
+      type: "INPUT_CHANGE";
+      inputId: string;
+      value: string | string[];
+      isValid: boolean;
+    }
+  | { type: "SET_DATA"; inputs: GeneralInput; validity: boolean };
 
 const formReducer = (state: State, action: Action) => {
   switch (action.type) {
@@ -30,6 +35,7 @@ const formReducer = (state: State, action: Action) => {
         },
         isValid: formIsValid,
       };
+
     case "SET_DATA":
       return {
         inputs: {
@@ -44,7 +50,7 @@ const formReducer = (state: State, action: Action) => {
 };
 
 export const useForm = (
-  initialInputs: GeneralTaskType,
+  initialInputs: GeneralInput,
   initialValidity: boolean
 ) => {
   const [formState, dispatch] = useReducer(formReducer, {
@@ -53,18 +59,7 @@ export const useForm = (
   });
 
   const inputHandler = useCallback(
-    (id: string, value: string, isValid: boolean) => {
-      dispatch({
-        type: "INPUT_CHANGE",
-        inputId: id,
-        value: value,
-        isValid: isValid,
-      });
-    },
-    []
-  );
-  const dropdownHandler = useCallback(
-    (id: string, value: string, isValid: boolean) => {
+    (id: string, value: string | string[], isValid: boolean) => {
       dispatch({
         type: "INPUT_CHANGE",
         inputId: id,
@@ -76,7 +71,7 @@ export const useForm = (
   );
 
   const SetData = useCallback(
-    (newInputs: GeneralTaskType, newValidity: boolean) => {
+    (newInputs: GeneralInput, newValidity: boolean) => {
       dispatch({
         type: "SET_DATA",
         inputs: newInputs,
@@ -86,5 +81,5 @@ export const useForm = (
     []
   );
 
-  return { formState, inputHandler, dropdownHandler, SetData };
+  return { formState, inputHandler, SetData };
 };

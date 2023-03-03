@@ -7,6 +7,7 @@ validate(inputState,VALIDATOR_MIN(1));
 
 const VALIDATOR_TYPE_REQUIRE = "REQUIRE";
 const VALIDATOR_TYPE_REQUIRE_SELECT = "SELECTREQUIRE";
+const VALIDATOR_TYPE_MULTI_SELECT = "MULTISELECT";
 const VALIDATOR_TYPE_MINLENGTH = "MINLENGTH";
 const VALIDATOR_TYPE_MAXLENGTH = "MAXLENGTH";
 const VALIDATOR_TYPE_MIN = "MIN";
@@ -20,6 +21,9 @@ export type Validators = {
 };
 
 export const VALIDATOR_REQUIRE = () => ({ type: VALIDATOR_TYPE_REQUIRE });
+export const VALIDATOR_MULTI_SELECT = () => ({
+  type: VALIDATOR_TYPE_MULTI_SELECT,
+});
 export const VALIDATOR_REQUIRE_SELECT = () => ({
   type: VALIDATOR_TYPE_REQUIRE_SELECT,
 });
@@ -43,11 +47,17 @@ export const VALIDATOR_MAX = (val: string | number) => ({
   val: val,
 });
 
-export const validate = (value: string | number, validators: Validators[]) => {
+export const validate = (
+  value: string | number | string[],
+  validators: Validators[]
+) => {
   let isValid = true;
   for (const validator of validators) {
     if (validator.type === VALIDATOR_TYPE_REQUIRE) {
       isValid = isValid && (value as string).trim().length > 0;
+    }
+    if (validator.type === VALIDATOR_TYPE_MULTI_SELECT) {
+      isValid = isValid && (value as string[]).length > 0;
     }
     if (validator.type === VALIDATOR_TYPE_REQUIRE_SELECT) {
       isValid = isValid && value !== "default";

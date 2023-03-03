@@ -1,72 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { AiFillCaretDown, AiOutlineClose } from "react-icons/ai";
 
-export type SelectOption = {
-  label: string;
-  value: string | number;
-};
-export type KvpProps =
-  | {
-      [key: string]: {
-        value: SelectOption[];
-        isValid: boolean;
-      };
-    }
-  | undefined;
-
-type MultipleSelectProps = {
-  id: string;
-  kvpValues: KvpProps;
-  onChange: (value: KvpProps) => void;
-};
-
-type SelectProps = {
-  options: SelectOption[];
-} & MultipleSelectProps;
-
-export function Select({ id, kvpValues, onChange, options }: SelectProps) {
+function MultiSelect({
+  id,
+  value,
+  onChange,
+  onBlur,
+  disabled,
+  options,
+  className,
+}: MultiSelect) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   function clearOptions() {
-    onChange(undefined);
+    onChange({ label: "clear", value: "all" });
   }
 
-  function selectOption(option: SelectOption) {
-    let newValue: KvpProps;
+  function selectOption(option: Option) {
+    onChange(option);
+  }
 
-    if (kvpValues) {
-      if (kvpValues[id]?.value.includes(option)) {
-        const newValue: KvpProps = {
-          [id]: {
-            value: kvpValues[id].value.filter((o) => o !== option),
-            isValid: true,
-          },
-        };
-        onChange(newValue);
-      } else {
-        const newValue: KvpProps = {
-          [id]: {
-            value: [...kvpValues[id]?.value, option],
-            isValid: true,
-          },
-        };
-        onChange(newValue);
-      }
-    } else {
-      newValue = {
-        [id]: {
-          value: [option],
-          isValid: true,
-        },
-      };
-      onChange(newValue);
+  function isOptionSelected(option: Option) {
+    if (value) {
+      return value.includes(option.value);
     }
-  }
-
-  function isOptionSelected(option: SelectOption) {
-    if (kvpValues) return kvpValues[id].value.includes(option);
   }
 
   useEffect(() => {
@@ -111,13 +70,11 @@ export function Select({ id, kvpValues, onChange, options }: SelectProps) {
   }, [isOpen, highlightedIndex, options]);
 
   return (
-    <div className="flex flex-col w-full">
-      <label className="font-semibold" htmlFor="">
-        Multi Select Items
-      </label>
+    <div className={`${className} flex flex-col w-full`}>
       <div
         ref={containerRef}
         onBlur={() => {
+          onBlur();
           setIsOpen(false);
         }}
         onClick={() => setIsOpen((prev) => !prev)}
@@ -127,17 +84,17 @@ export function Select({ id, kvpValues, onChange, options }: SelectProps) {
       "
       >
         <span className="flex gap-1 flex-wrap w-full">
-          {kvpValues && kvpValues[id].value.length > 0 ? (
-            kvpValues[id]?.value.map((v) => (
+          {value?.length > 0 ? (
+            (value as string[]).map((v) => (
               <button
-                key={v.value}
+                key={v + "Id"}
                 onClick={(e) => {
                   e.stopPropagation();
-                  selectOption(v);
+                  selectOption({ label: "clear", value: v });
                 }}
                 className="flex items-center gap-1 text-sm border border-gray-500 outline-none px-1 py-[0.1rem] rounded-md cursor-pointer "
               >
-                {v.label}
+                {v}
                 <span>
                   <AiOutlineClose />
                 </span>
@@ -193,3 +150,5 @@ export function Select({ id, kvpValues, onChange, options }: SelectProps) {
     </div>
   );
 }
+
+export default MultiSelect;

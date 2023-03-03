@@ -1,15 +1,17 @@
 import React, { useReducer, useEffect } from "react";
 import { Validators } from "../../utils/validators";
 import { validate } from "../../utils/validators";
+import MultiSelect from "./MultiSelect";
 
 type State = {
-  value: string;
+  value: string | string[];
   isValid: boolean;
   isTouched: boolean;
 };
 
 type Action =
   | { type: "CHANGE"; val: string; validators: Validators[] }
+  | { type: "SELECT"; val: Option; validators: Validators[] }
   | { type: "TOUCH" };
 
 const inputReducer = (state: State, action: Action): State => {
@@ -20,6 +22,39 @@ const inputReducer = (state: State, action: Action): State => {
         value: action.val,
         isValid: validate(action.val, action.validators),
       };
+    case "SELECT":
+      if (action.val.label === "clear") {
+        if (action.val.value === "all") {
+          return {
+            ...state,
+            value: [],
+            isValid: validate([], action.validators),
+          };
+        } else {
+          const newValues = (state.value as string[]).filter(
+            (val) => val !== action.val.value
+          );
+          return {
+            ...state,
+            value: newValues,
+            isValid: validate(newValues, action.validators),
+          };
+        }
+      } else if (state.value.includes(action.val.value)) {
+        const newValues = (state.value as string[]).filter(
+          (val) => val !== action.val.value
+        );
+        return {
+          ...state,
+          value: newValues,
+          isValid: validate(newValues, action.validators),
+        };
+      } else
+        return {
+          ...state,
+          value: [...state.value, action.val.value],
+          isValid: validate(action.val.value, action.validators),
+        };
     case "TOUCH":
       return {
         ...state,
@@ -28,24 +63,6 @@ const inputReducer = (state: State, action: Action): State => {
     default:
       return state;
   }
-};
-
-type GeneralInputProps = {
-  classes?: string;
-  initialValue?: string;
-  initialValid?: boolean;
-  element: "select" | "textarea" | "text";
-  type?: "text" | "email" | "password" | "url" | "number";
-  id: string;
-  label?: string;
-  placeholder?: string;
-  value: string;
-  options?: JSX.Element[];
-  rows?: number;
-  disabled?: boolean;
-  errorText: string;
-  validators: Validators[];
-  onInputChange: (id: string, value: string, isValid: boolean) => void;
 };
 
 function FormInput(props: GeneralInputProps) {
@@ -57,7 +74,6 @@ function FormInput(props: GeneralInputProps) {
 
   const { id, onInputChange } = props;
   const { value, isValid } = inputState;
-
   useEffect(() => {
     onInputChange(id, value, isValid);
   }, [id, value, isValid, onInputChange]);
@@ -73,6 +89,13 @@ function FormInput(props: GeneralInputProps) {
       validators: props.validators,
     });
   };
+  const selectHandler = (element: Option) => {
+    dispatch({
+      type: "SELECT",
+      val: element,
+      validators: props.validators,
+    });
+  };
 
   const touchHandler = () => {
     dispatch({
@@ -81,7 +104,18 @@ function FormInput(props: GeneralInputProps) {
   };
 
   let component =
-    props.element === "textarea" ? (
+    props.element === "text" ? (
+      <input
+        id={props.id}
+        className={props.classes}
+        type={props.type}
+        placeholder={props.placeholder}
+        onChange={changeHandler}
+        onBlur={touchHandler}
+        value={inputState.value}
+        disabled={props.disabled}
+      />
+    ) : props.element === "textarea" ? (
       <textarea
         id={props.id}
         className={props.classes}
@@ -105,15 +139,14 @@ function FormInput(props: GeneralInputProps) {
         {props.options}
       </select>
     ) : (
-      <input
+      <MultiSelect
         id={props.id}
-        className={props.classes}
-        type={props.type}
-        placeholder={props.placeholder}
-        onChange={changeHandler}
+        className={props.classes!}
+        onChange={selectHandler}
         onBlur={touchHandler}
-        value={inputState.value}
         disabled={props.disabled}
+        options={props.multiSelectOpts!}
+        value={inputState.value}
       />
     );
 

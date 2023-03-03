@@ -1,42 +1,38 @@
-import { FormEvent, useState } from "react";
-import { useForm } from "../shared/Form/form-hook";
+import { FormEvent, useEffect } from "react";
+import { State, useForm } from "../shared/Form/form-hook";
 import FormInput from "../shared/Form/Input";
-import { Select } from "../shared/Form/MultiSelect";
+
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
+  VALIDATOR_REQUIRE,
   VALIDATOR_REQUIRE_SELECT,
+  VALIDATOR_MULTI_SELECT,
 } from "../utils/validators";
-
-import { KvpProps } from "../shared/Form/MultiSelect";
 
 type Props = {};
 
 const arr = ["red", "blue", "purple", "orange"];
 const typeers = arr.map((item, idx) => <option key={idx}>{item}</option>);
 
-const options = [
-  { label: "First", value: 1 },
-  { label: "Second", value: 2 },
-  { label: "Third", value: 3 },
-  { label: "Fourth", value: 4 },
-  { label: "Fifth", value: 5 },
+const options: Option[] = [
+  { label: "red", value: "red" },
+  { label: "blue", value: "blue" },
+  { label: "purple", value: "purple" },
+  { label: "orange", value: "orange" },
 ];
 
+const formInitials = {
+  firstName: { value: "", isValid: false },
+  favoriteColor: { value: "", isValid: false },
+  email: { value: "", isValid: false },
+  password: { value: "", isValid: false },
+  description: { value: "", isValid: false },
+  favoriteColors: { value: "", isValid: false },
+};
+const initialValidity = false;
 const Form = (props: Props) => {
-  const { formState, inputHandler } = useForm(
-    {
-      firstName: { value: "", isValid: false },
-      favoriteColor: { value: "", isValid: false },
-      email: { value: "", isValid: false },
-      password: { value: "", isValid: false },
-      description: { value: "", isValid: false },
-      multiselect: { value: "", isValid: false },
-    },
-    false
-  );
-
-  const [value, setValue] = useState<KvpProps>(undefined);
+  const { formState, inputHandler } = useForm(formInitials, initialValidity);
 
   const formSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
@@ -50,11 +46,15 @@ const Form = (props: Props) => {
     >
       <h2 className="font-bold text-2xl mb-10">Form Title</h2>
       <div className="w-full flex md:flex-row flex-col gap-4">
-        <Select
-          id="numbers"
-          options={options}
-          kvpValues={value}
-          onChange={(o) => setValue(o)}
+        <FormInput
+          element="multi"
+          id="favoriteColors"
+          onInputChange={inputHandler}
+          multiSelectOpts={options}
+          value={formState.inputs.favoriteColors.value}
+          errorText="Field is Required"
+          validators={[VALIDATOR_MULTI_SELECT()]}
+          label="Favorite Colors"
         />
       </div>
       <div className="w-full flex md:flex-row flex-col gap-4">
